@@ -20,7 +20,7 @@ while True:
     print('Client message is:', clientMessage.decode("utf-8"))
 
     seq = int(clientMessage)
-
+    # print('seq = ', seq)
     if(pkt_loss[seq] == 1):
         pkt_loss[seq] = 0
         seq = -1
@@ -34,7 +34,6 @@ while True:
         print('bad packet')
         clientMessage = str(expected - 1)
         server.sendto(clientMessage.encode(), addr)
-
     if expected == num_pkt:
         print('Have received all packets')
         break

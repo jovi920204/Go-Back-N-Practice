@@ -13,22 +13,22 @@ num_pkt = 10
 
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-while (send_base < num_pkt):
-    for i in range(0,cwnd_size):
-        if (send_base+i < num_pkt):
-            next_seq_num = send_base+i
-            clientMessage = str(next_seq_num)
-            client.sendto(clientMessage.encode(), server_addr)
+while True:
+    while next_seq_num < num_pkt and next_seq_num - send_base < cwnd_size:
+        clientMessage = str(next_seq_num)
+        client.sendto(clientMessage.encode(), server_addr)
+        print('base ', send_base, ' send ', next_seq_num)
+        next_seq_num += 1
+        
     client.settimeout(5)
     try:
         serverMessage, addr = client.recvfrom(1024)
-        print('server message is:', serverMessage.decode("utf-8"))
-        send_base += 1
+        print('ACK = ', serverMessage)
+        if (send_base == int(serverMessage)):
+            send_base += 1
+        if send_base == num_pkt:
+            break
+
     except Exception as e:
         print('timeout')
-        # the codes to handle the timeout event
-        for i in range(0,cwnd_size):
-            if (send_base+i < num_pkt):
-                next_seq_num = send_base+i
-                clientMessage = str(next_seq_num)
-                client.sendto(clientMessage.encode(), server_addr)
+        next_seq_num = send_base
